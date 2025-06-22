@@ -22,29 +22,13 @@ function App() {
   const validateValues = (values) => {
     const errors = {};
 
-    if (!values.name.trim()) {
-      errors.name = "Inserisci il tuo nome";
-    }
-
-    if (!values.username.trim()) {
-      errors.username = "Lo username deve contene almeno 6 caratteri. Spazi e simboli non sono permessi";
-    }
-
-    if (values.password.length < 6) {
-      errors.password = "La password deve contenere almeno 8 caratteri, 1 lettera, 1 numero e 1 simbolo";
-    }
-
-    if (!values.specialization) {
-      errors.specialization = "Seleziona una specializzazione";
-    }
-
-    if (Number(values.experience) % 2 !== 0) {
-      errors.experience = "Gli anni di esperienza devono essere pari";
-    }
-
-    if (!values.description.trim()) {
-      errors.description = "La descrizione deve contenere tra 100 e 1000 caratteri. Spazi iniziali e finali non sono permessi";
-    }
+    if (!values.name.trim() ||
+      !values.username.trim() ||
+      values.password.length < 6 ||
+      !values.specialization ||
+      Number(values.experience) % 2 !== 0 ||
+      !values.description.trim()
+    ) { errors.name = "Verifica che tutti i campi siano corretti"; }
 
     console.log(errors);
 
@@ -65,7 +49,7 @@ function App() {
     setErrors(validationErrors);
 
     if (Object.values(validationErrors).length > 0) {
-      console.log("Errore, verifica che tutti i campi siano corretti")
+      console.log("Errore, non hai compilato tutti i campi")
       return;
     }
 
@@ -80,7 +64,7 @@ function App() {
 
       <form className='custom-form' onSubmit={handleSubmit}>
 
-        <label>Nome e Cognome:
+        <label>Nome Completo:
           <input type="text"
             value={form.name}
             name="name"
