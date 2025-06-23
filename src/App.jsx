@@ -1,19 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import './App.css';
 
 
 function App() {
 
   // Stato iniziale del form
+  // - campi controllati
 
   const [form, setForm] = useState({
-    name: "",
     username: "",
     password: "",
-    specialization: "",
-    experience: "",
     description: ""
   });
+
+  // Stato iniziale del form
+  // - campi NON controllati
+  const fullNameRef = useRef();
+  const specializationRef = useRef();
+  const experienceRef = useRef();
 
 
   // Valori iniziali per la validazione degli errori
@@ -68,12 +72,18 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // Valori NON controllati
+
+    const fullName = fullNameRef.current.value;
+    const specialization = specializationRef.current.value;
+    const experience = experienceRef.current.value;
+
     if (
-      !form.name.trim() ||
+      !fullName.trim() ||
       !form.username.trim() ||
       !form.password.trim() ||
-      !form.specialization.trim() ||
-      !form.experience.toString().trim() ||
+      !specialization.trim() ||
+      !experience.toString().trim() ||
       !form.description.trim() ||
       !isUsernameValid ||
       !isPasswordValid ||
@@ -97,7 +107,7 @@ function App() {
 
       <label>
         Nome Completo:
-        <input type="text" name="name" value={form.name} onChange={handleChange} />
+        <input type="text" ref={fullNameRef} />
       </label>
 
 
@@ -127,7 +137,7 @@ function App() {
 
       <label>
         Specializzazione:
-        <select name="specialization" value={form.specialization} onChange={handleChange}>
+        <select name="specialization" ref={specializationRef}>
           <option value="">Seleziona una specializzazione</option>
           <option value="Full Stack">Full Stack</option>
           <option value="Frontend">Frontend</option>
@@ -138,7 +148,7 @@ function App() {
 
       <label>
         Anni di esperienza:
-        <input type="number" name="experience" value={form.experience} onChange={handleChange} min="0" />
+        <input type="number" name="experience" ref={experienceRef} min="0" />
       </label>
 
 
