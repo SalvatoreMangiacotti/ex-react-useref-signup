@@ -1,9 +1,10 @@
-import { useState } from 'react'
-
-import './App.css'
+import { useState, useMemo } from 'react';
+import './App.css';
 
 
 function App() {
+
+  // Stato iniziale del form
 
   const [form, setForm] = useState({
     name: "",
@@ -15,135 +16,150 @@ function App() {
   });
 
 
-  const [errors, setErrors] = useState({});
+  // Valori iniziali per la validazione degli errori
+
+  const letters = "abcdefghijklmnopqrstuvwxyz";
+  const numbers = "0123456789";
+  const symbols = "!@#$%^&*()-_=+[]{}|;:'\\\",.<>?/`~";
 
 
-  // Validazione errori
-  const validateValues = (values) => {
-    const errors = {};
+  // Validazione dello username
 
-    if (!values.name.trim() ||
-      !values.username.trim() ||
-      values.password.length < 6 ||
-      !values.specialization ||
-      Number(values.experience) % 2 !== 0 ||
-      !values.description.trim()
-    ) { errors.name = "Verifica che tutti i campi siano corretti"; }
+  const isUsernameValid = useMemo(() => {
+    const characters = form.username.trim().split("");
+    return (
+      characters.length >= 6 &&
+      characters.every(char => letters.includes(char.toLowerCase()) || numbers.includes(char))
+    );
+  }, [form.username]);
 
-    console.log(errors);
 
-    return errors;
+  // Validazione della password
+
+  const isPasswordValid = useMemo(() => {
+    const password = form.password.trim();
+    return (
+      password.length >= 6 &&
+      [...password].some(char => letters.includes(char)) &&
+      [...password].some(char => numbers.includes(char)) &&
+      [...password].some(char => symbols.includes(char))
+    );
+  }, [form.password]);
+
+
+  // Validazione della descrizione
+
+  const isDescriptionValid = useMemo(() => {
+    const length = form.description.trim().length;
+    return length >= 100 && length < 1000;
+  }, [form.description]);
+
+
+  // Gestione del cambiamento di ogni campo del form
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
 
-  const handleChange = (event) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
-  };
+  // Gestione dell'invio del form e verifica dei campi
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    event.preventDefault();
-
-    const validationErrors = validateValues(form);
-
-    setErrors(validationErrors);
-
-    if (Object.values(validationErrors).length > 0) {
-      console.log("Errore, non hai compilato tutti i campi")
+    if (
+      !form.name.trim() ||
+      !form.username.trim() ||
+      !form.password.trim() ||
+      !form.specialization.trim() ||
+      !form.experience.toString().trim() ||
+      !form.description.trim() ||
+      !isUsernameValid ||
+      !isPasswordValid ||
+      !isDescriptionValid
+    ) {
+      console.log("Errore, compila tutti i campi correttamente");
       return;
     }
 
-    console.log(form);
+    console.log("Form inviato con successo:", form);
 
   };
 
 
+  // Rendering del form.
+  // Per ogni campo appare un messaggio di successo o di errore, in tempo reale.
+
   return (
 
-    <>
+    <form className="custom-form" onSubmit={handleSubmit}>
 
-      <form className='custom-form' onSubmit={handleSubmit}>
+      <label>
+        Nome Completo:
+        <input type="text" name="name" value={form.name} onChange={handleChange} />
+      </label>
 
-        <label>Nome Completo:
-          <input type="text"
-            value={form.name}
-            name="name"
-            onChange={handleChange}
-          />{errors.name && <span className="error">{errors.name}</span>}
-        </label>
 
-        <label>Username:
-          <input type="text"
-            value={form.username}
-            name="username"
-            onChange={handleChange}
-          />{errors.username && <span className="error">{errors.username}</span>}
-        </label>
+      <label>
+        Username:
+        <input type="text" name="username" value={form.username} onChange={handleChange} />
 
-        <label>Password:
-          <input type="text"
-            value={form.password}
-            name="password"
-            onChange={handleChange}
-          />{errors.password && <span className="error">{errors.password}</span>}
-        </label>
+        {form.username.trim() && (
+          <span className="error" style={{ color: isUsernameValid ? "green" : "red" }}>
+            {isUsernameValid ? "Username valido" : "Sono richiesti almeno 6 caratteri"}
+          </span>
+        )}
+      </label>
 
-        <label>Specializzazione:
-          <select
-            value={form.specialization}
-            name="specialization"
-            onChange={handleChange}
-          >
-            <option value="">Seleziona una specializzazione</option>
-            <option value="Full Stack">Full stack</option>
-            <option value="Frontend">Frontend</option>
-            <option value="Backend">Backend</option>
-          </select>{errors.specialization && <span className="error">{errors.specialization}</span>}
-        </label>
 
-        <label>Anni di esperienza:
-          <input type="number"
-            value={form.experience}
-            name="experience"
-            onChange={handleChange}
-            min="0" max="100"
-          />{errors.experience && <span className="error">{errors.experience}</span>}
-        </label>
+      <label>
+        Password:
+        <input type="text" name="password" value={form.password} onChange={handleChange} />
 
-        <label>Breve descrizione sullo sviluppatore:
-          <textarea
-            value={form.description}
-            name="description"
-            onChange={handleChange}
-          />{errors.description && <span className="error">{errors.description}</span>}
-        </label>
+        {form.password.trim() && (
+          <span className="error" style={{ color: isPasswordValid ? "green" : "red" }}>
+            {isPasswordValid ? "Password valida" : "Sono richiesti almeno  1 lettera, 1 numero e 1 simbolo"}
+          </span>
+        )}
+      </label>
 
-        <button type="submit">Submit</button>
 
-      </form>
+      <label>
+        Specializzazione:
+        <select name="specialization" value={form.specialization} onChange={handleChange}>
+          <option value="">Seleziona una specializzazione</option>
+          <option value="Full Stack">Full Stack</option>
+          <option value="Frontend">Frontend</option>
+          <option value="Backend">Backend</option>
+        </select>
+      </label>
 
-    </>
 
-  )
+      <label>
+        Anni di esperienza:
+        <input type="number" name="experience" value={form.experience} onChange={handleChange} min="0" />
+      </label>
+
+
+      <label>
+        Descrizione:
+        <textarea name="description" value={form.description} onChange={handleChange} />
+
+        {form.description.trim() && (
+          <span className="error" style={{ color: isDescriptionValid ? "green" : "red" }}>
+            {isDescriptionValid ? "Grazie per aver fornito una descrizione valida!" : "Sono richiesti un minimo 100 e un massimo 1000 caratteri"}
+          </span>
+        )}
+      </label>
+
+      <button type="submit">Invia</button>
+
+    </form>
+
+  );
 
 }
 
-export default App
 
-
-
-// Milestone 1: Creare un Form con Campi Controllati
-
-// Crea un form di registrazione con i seguenti campi controllati (gestiti con useState):
-
-// ✅ Nome completo (input di testo)
-
-// ✅ Username (input di testo)
-
-// ✅ Password (input di tipo password)
-
-// ✅ Specializzazione (select con opzioni: "Full Stack", "Frontend", "Backend")
-
-// ✅ Anni di esperienza (input di tipo number)
-
-// ✅ Breve descrizione sullo sviluppatore (textarea)
+export default App;
